@@ -1043,15 +1043,24 @@ class MainActivity : AppCompatActivity() {
         usbTransportRadio = view.findViewById(R.id.usbTransportRadio)
         wifiTransportRadio = view.findViewById(R.id.wifiTransportRadio)
 
-          usbTransportRadio.setOnCheckedChangeListener { _, _ ->
-              updateWifiSettingsVisibility()
+            usbTransportRadio.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    settings.transport = "USB"
+                    settingsRepository.save(settings)
+                    restartMidiTransport()
+                }
 
-          }
+                updateWifiSettingsVisibility()
+            }
 
-          wifiTransportRadio.setOnCheckedChangeListener { _, _ ->
-              updateWifiSettingsVisibility()
+            wifiTransportRadio.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    settings.transport = "WIFI"
+                    settingsRepository.save(settings)
+                }
 
-          }
+                updateWifiSettingsVisibility()
+            }
 
           wifiSettingsContainer =
               view.findViewById(R.id.wifiSettingsContainer)
