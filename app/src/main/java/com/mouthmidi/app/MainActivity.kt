@@ -1494,11 +1494,16 @@ class MainActivity : AppCompatActivity() {
               attackSpeed =
                   settings.attackSpeed,
 
-              releaseSpeed =
-                  settings.releaseSpeed,
+                releaseSpeed =
+                    settings.releaseSpeed,
 
-              deadZone =
-                  settings.deadZone,
+                smoothing =
+                    settings.smoothing,
+
+                deadZone =
+                    settings.deadZone,
+
+
 
 
             invert =
@@ -1529,6 +1534,7 @@ class MainActivity : AppCompatActivity() {
           settings.attackSpeed = 0f
             settings.releaseSpeed = 0f
           settings.deadZone = 0f
+
 
           settings.invert = false
           settings.holdLastValue = true
@@ -1578,8 +1584,10 @@ class MainActivity : AppCompatActivity() {
         settings.attackSpeed =
                 preset.attackSpeed
 
-            settings.releaseSpeed =
+        settings.releaseSpeed =
                 preset.releaseSpeed
+
+
 
           settings.deadZone =
               preset.deadZone
@@ -2048,15 +2056,8 @@ private fun loadSettingsUI() {
         settings.attackSpeed =
               (attackSpeedSeekBar.progress - 50) / 33.333f
 
-          settings.releaseSpeed =
-              (releaseSpeedSeekBar.progress - 50) / 33.333f
-
-        settings.minCC =
-            minCCSeekBar.progress.coerceIn(0,127)
-
-        settings.maxCC =
-            maxCCSeekBar.progress.coerceIn(0,127)
-
+        settings.releaseSpeed =
+            (releaseSpeedSeekBar.progress - 50) / 33.333f
           settings.deadZone =
               deadZoneSeekBar.progress / 100f
 
