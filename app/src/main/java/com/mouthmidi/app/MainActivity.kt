@@ -1533,6 +1533,7 @@ class MainActivity : AppCompatActivity() {
           settings.smoothing = 0f
           settings.attackSpeed = 0f
             settings.releaseSpeed = 0f
+
           settings.deadZone = 0f
 
 
@@ -1579,13 +1580,19 @@ class MainActivity : AppCompatActivity() {
               preset.midiChannel
 
         settings.smoothing =
-                preset.smoothing
+            preset.smoothing
 
         settings.attackSpeed =
-                preset.attackSpeed
+            preset.attackSpeed
 
         settings.releaseSpeed =
-                preset.releaseSpeed
+            preset.releaseSpeed
+
+        settings.minCC =
+            preset.minCC
+
+        settings.maxCC =
+            preset.maxCC
 
 
 
@@ -2054,12 +2061,19 @@ private fun loadSettingsUI() {
         )
 
         settings.attackSpeed =
-              (attackSpeedSeekBar.progress - 50) / 33.333f
+            (attackSpeedSeekBar.progress - 50) / 33.333f
 
         settings.releaseSpeed =
             (releaseSpeedSeekBar.progress - 50) / 33.333f
-          settings.deadZone =
-              deadZoneSeekBar.progress / 100f
+
+        settings.minCC =
+            minCCSeekBar.progress.coerceIn(0,127)
+
+        settings.maxCC =
+            maxCCSeekBar.progress.coerceIn(0,127)
+
+        settings.deadZone =
+            deadZoneSeekBar.progress / 100f
 
 
         settings.invert =
