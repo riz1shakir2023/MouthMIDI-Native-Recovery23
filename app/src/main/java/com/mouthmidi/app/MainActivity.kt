@@ -140,6 +140,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var settingsRepository: SettingsRepository
 
+    private lateinit var presetFileManager: PresetFileManager
+
     private lateinit var midiTransport: MidiTransport
 
 
@@ -185,6 +187,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         settingsRepository = SettingsRepository(this)
+
+        presetFileManager = PresetFileManager(this)
 
         settings = settingsRepository.load()
 
@@ -1043,15 +1047,24 @@ class MainActivity : AppCompatActivity() {
         usbTransportRadio = view.findViewById(R.id.usbTransportRadio)
         wifiTransportRadio = view.findViewById(R.id.wifiTransportRadio)
 
-          usbTransportRadio.setOnCheckedChangeListener { _, _ ->
-              updateWifiSettingsVisibility()
+        usbTransportRadio.setOnCheckedChangeListener { _, checked ->
+            if (checked) {
+                settings.transport = "USB"
+                settingsRepository.save(settings)
+                restartMidiTransport()
+            }
+            updateWifiSettingsVisibility()
+        }
 
-          }
+        wifiTransportRadio.setOnCheckedChangeListener { _, checked ->
+            if (checked) {
+                settings.transport = "WIFI"
+                settingsRepository.save(settings)
+                restartMidiTransport()
+            }
+            updateWifiSettingsVisibility()
+        }
 
-          wifiTransportRadio.setOnCheckedChangeListener { _, _ ->
-              updateWifiSettingsVisibility()
-
-          }
 
           wifiSettingsContainer =
               view.findViewById(R.id.wifiSettingsContainer)
@@ -1271,7 +1284,7 @@ class MainActivity : AppCompatActivity() {
 
                         saveSettings()
 
-                        settingsRepository.savePreset(
+                        presetFileManager.savePreset(
                             name,
                             currentPresetSettings()
                         )
@@ -1312,7 +1325,7 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            settingsRepository.deletePreset(name)
+            presetFileManager.deletePreset(name)
 
             settingsRepository.saveLastPreset("Default")
 
@@ -1439,7 +1452,7 @@ class MainActivity : AppCompatActivity() {
             mutableListOf("Default")
 
         names.addAll(
-            settingsRepository.getPresetNames()
+            presetFileManager.getPresetNames()
         )
 
         val lastPreset =
@@ -1556,7 +1569,7 @@ class MainActivity : AppCompatActivity() {
       private fun applyPreset(name: String) {
 
           val preset =
-              settingsRepository.loadPreset(name)
+              presetFileManager.loadPreset(name) ?: return
 
           println("DEBUG APPLY PRESET: $name theme=${preset.themeColor}")
 
