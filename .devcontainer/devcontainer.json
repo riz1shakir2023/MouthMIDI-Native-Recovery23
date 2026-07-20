@@ -1,0 +1,27 @@
+{
+    "name": "MouthMIDI Native Development",
+
+    "image": "mcr.microsoft.com/devcontainers/java:17",
+
+    "features": {
+        "ghcr.io/devcontainers/features/android-sdk:2": {
+            "platformTools": true,
+            "buildTools": true,
+            "platforms": "android-35"
+        }
+    },
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "fwcd.kotlin",
+                "vscjava.vscode-gradle",
+                "vscjava.vscode-java-pack"
+            ]
+        }
+    },
+
+    "postCreateCommand": "chmod +x gradlew && yes | sdkmanager --licenses > /dev/null 2>&1 || true && ./gradlew --version",
+
+    "remoteUser": "vscode"
+}
