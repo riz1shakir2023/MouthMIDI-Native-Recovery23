@@ -4,3 +4,8 @@ build/
 local.properties
 .idea/
 *.iml
+
+# Git history recovery backups
+*.bundle
+*.tar.gz
+MouthMIDI-git-history-snapshot.txt
