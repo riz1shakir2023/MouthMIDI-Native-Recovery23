@@ -27,6 +27,16 @@ jobs:
           yes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true
           "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
 
+      - name: Diagnose the keystore secret (lengths only, never the value)
+        run: |
+          RAW="${{ secrets.KEYSTORE_BASE64 }}"
+          CLEAN=$(printf '%s' "$RAW" | tr -d '[:space:]')
+          echo "raw length: ${#RAW}"
+          echo "clean length: ${#CLEAN}"
+          echo "clean length mod 4: $(( ${#CLEAN} % 4 ))"
+          echo "padding '=' count: $(printf '%s' "$CLEAN" | tr -cd '=' | wc -c)"
+          echo "non-base64-alphabet chars: $(printf '%s' "$CLEAN" | tr -d 'A-Za-z0-9+/=' | wc -c)"
+          echo "expected: clean 3732, mod 0, padding 1, non-alphabet 0"
       - name: Decode the release keystore from secrets
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
