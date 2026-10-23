@@ -28,9 +28,13 @@ jobs:
           "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Decode the release keystore from secrets
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "${{ runner.temp }}/mouthmidi-release.jks"
-          test -s "${{ runner.temp }}/mouthmidi-release.jks"
+          printf '%s' "${{ secrets.KEYSTORE_BASE64 }}" | tr -d '[:space:]' | base64 --decode --ignore-garbage > "${{ runner.temp }}/mouthmidi-release.jks"
+          ls -la "${{ runner.temp }}/mouthmidi-release.jks"
+          test $(stat -c%s "${{ runner.temp }}/mouthmidi-release.jks") -gt 2000
+          keytool -list -keystore "${{ runner.temp }}/mouthmidi-release.jks" -storepass "$KEYSTORE_PASSWORD" | grep -i mouthmidi
 
       - name: Build Free + Pro release APKs (signed)
         env:
