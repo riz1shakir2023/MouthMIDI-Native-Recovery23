@@ -67,6 +67,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var recalibrateButton: Button
     private lateinit var defaultCalibrationButton: Button
     private lateinit var userManualLink: TextView
+    private lateinit var getProLink: TextView
+    private lateinit var proBannerButton: Button
+
+    // Live store link for the Pro listing. Empty until the Gumroad/Ko-fi
+    // listings exist — paste the Pro product URL here before release and the
+    // "Get Pro" buttons start working. Never a placeholder link.
+    private val PRO_STORE_URL: String = ""
     private lateinit var calibrationStatusText: TextView
     private lateinit var settingsScrollView: ScrollView
     private lateinit var settingsRootLayout: LinearLayout
@@ -1135,6 +1142,27 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        // Free/Pro upsell entry points. Both live OUTSIDE the locked cards
+        // (banner above them, link in the footer), so they stay tappable in
+        // the Free build. In Pro they are hidden completely.
+        proBannerButton =
+            view.findViewById(R.id.proBannerButton)
+
+        getProLink =
+            view.findViewById(R.id.getProLink)
+
+        if (BuildConfig.IS_PRO) {
+            proBannerButton.visibility = View.GONE
+            getProLink.visibility = View.GONE
+        } else {
+            proBannerButton.setOnClickListener {
+                showProUpsell()
+            }
+            getProLink.setOnClickListener {
+                showProUpsell()
+            }
+        }
+
         wifiConnectButton.setOnClickListener {
 
             saveSettings()
@@ -1354,6 +1382,64 @@ class MainActivity : AppCompatActivity() {
 
         }
 
+        applyTierLocking()
+
+    }
+
+    // ---- Free / Pro tier locking -------------------------------------------
+    // Free build: Settings still opens and every value stays visible, but all
+    // seven cards are disabled and dimmed. Only the footer links (User
+    // Manual, socials) and the two Get Pro entry points stay live — they live
+    // outside the cards. Pro build: this is a no-op.
+    // NOTE: disabled controls in Android swallow touches, so tapping a locked
+    // card cannot reliably raise the upsell — that is what the banner above
+    // the cards and the footer link are for.
+
+    private fun applyTierLocking() {
+
+        if (BuildConfig.IS_PRO) return
+
+        val lockedCards = listOf(
+            presetCard, midiCard, calibrationCard, trackingCard,
+            deviceCard, themeCard, transportCard
+        )
+
+        for (card in lockedCards) {
+            setControlsEnabled(card, false)
+            card.alpha = 0.55f
+        }
+    }
+
+    private fun setControlsEnabled(view: View, enabled: Boolean) {
+        view.isEnabled = enabled
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                setControlsEnabled(view.getChildAt(i), enabled)
+            }
+        }
+    }
+
+    private fun showProUpsell() {
+
+        val builder = AlertDialog.Builder(this)
+            .setTitle("MouthMIDI Pro")
+            .setMessage(
+                "Settings are locked in the Free version.\n\n" +
+                "Pro unlocks presets, mouth calibration, every tracking " +
+                "slider, MIDI channel & CC number, themes, device options " +
+                "and Wi-Fi MIDI."
+            )
+            .setNegativeButton("Not now", null)
+
+        if (PRO_STORE_URL.isNotBlank()) {
+            builder.setPositiveButton("Get Pro") { _, _ ->
+                startActivity(
+                    Intent(Intent.ACTION_VIEW, Uri.parse(PRO_STORE_URL))
+                )
+            }
+        }
+
+        builder.show()
     }
 
 

@@ -9,3 +9,10 @@ local.properties
 *.bundle
 *.tar.gz
 MouthMIDI-git-history-snapshot.txt
+
+# Release signing — NEVER commit a keystore or its encoding
+*.jks
+*.keystore
+keystore.properties
+mouthmidi-release.jks
+keystore-base64.txt

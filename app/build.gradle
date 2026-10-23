@@ -12,8 +12,39 @@ android {
         applicationId "com.mouthmidi.app"
         minSdk 26
         targetSdk 35
+        // RULE (store model): Free and Pro of the same release share ONE
+        // versionCode, bumped together. That is what lets Pro install over
+        // Free as an in-place update, keeping the user's settings/presets.
         versionCode 1
         versionName "1.0"
+    }
+
+    flavorDimensions "tier"
+
+    productFlavors {
+        free {
+            dimension "tier"
+            manifestPlaceholders = [appLabel: "MouthMIDI"]
+            versionNameSuffix "-free"
+            buildConfigField "boolean", "IS_PRO", "false"
+        }
+        pro {
+            dimension "tier"
+            manifestPlaceholders = [appLabel: "MouthMIDI Pro"]
+            versionNameSuffix "-pro"
+            buildConfigField "boolean", "IS_PRO", "true"
+        }
+    }
+
+    signingConfigs {
+        release {
+            // Values come from the environment (GitHub Secrets in CI).
+            // Never hard-code passwords or commit a keystore.
+            storeFile file(System.getenv("KEYSTORE_FILE") ?: "mouthmidi-release.jks")
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS") ?: "mouthmidi"
+            keyPassword System.getenv("KEY_PASSWORD")
+        }
     }
 
     compileOptions {
@@ -31,6 +62,11 @@ android {
             proguardFiles getDefaultProguardFile(
                     'proguard-android-optimize.txt'
             ), 'proguard-rules.pro'
+            // Sign only when CI supplied a keystore; local unsigned release
+            // builds keep working exactly as before.
+            if (System.getenv("KEYSTORE_FILE") != null) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 
@@ -41,6 +77,7 @@ android {
 
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
 }
 
