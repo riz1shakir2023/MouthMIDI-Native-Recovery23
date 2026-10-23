@@ -28,24 +28,33 @@ jobs:
           "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Diagnose the keystore secret (lengths only, never the value)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_B64_1: ${{ secrets.KEYSTORE_B64_1 }}
+          KEYSTORE_B64_2: ${{ secrets.KEYSTORE_B64_2 }}
+          KEYSTORE_B64_3: ${{ secrets.KEYSTORE_B64_3 }}
+          KEYSTORE_B64_4: ${{ secrets.KEYSTORE_B64_4 }}
         run: |
-          RAW="${{ secrets.KEYSTORE_BASE64 }}"
-          CLEAN=$(printf '%s' "$RAW" | tr -d '[:space:]')
-          echo "raw length: ${#RAW}"
-          echo "clean length: ${#CLEAN}"
-          echo "clean length mod 4: $(( ${#CLEAN} % 4 ))"
-          echo "padding '=' count: $(printf '%s' "$CLEAN" | tr -cd '=' | wc -c)"
-          echo "non-base64-alphabet chars: $(printf '%s' "$CLEAN" | tr -d 'A-Za-z0-9+/=' | wc -c)"
-          echo "expected: clean 3732, mod 0, padding 1, non-alphabet 0"
+          echo "part1 length: ${#KEYSTORE_B64_1} (expect 933)"
+          echo "part2 length: ${#KEYSTORE_B64_2} (expect 933)"
+          echo "part3 length: ${#KEYSTORE_B64_3} (expect 933)"
+          echo "part4 length: ${#KEYSTORE_B64_4} (expect 933)"
+          echo "legacy single-secret length: ${#KEYSTORE_BASE64}"
       - name: Decode the release keystore from secrets
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_B64_1: ${{ secrets.KEYSTORE_B64_1 }}
+          KEYSTORE_B64_2: ${{ secrets.KEYSTORE_B64_2 }}
+          KEYSTORE_B64_3: ${{ secrets.KEYSTORE_B64_3 }}
+          KEYSTORE_B64_4: ${{ secrets.KEYSTORE_B64_4 }}
         run: |
-          printf '%s' "${{ secrets.KEYSTORE_BASE64 }}" | tr -d '[:space:]' | base64 --decode --ignore-garbage > "${{ runner.temp }}/mouthmidi-release.jks"
+          JOINED="${KEYSTORE_B64_1}${KEYSTORE_B64_2}${KEYSTORE_B64_3}${KEYSTORE_B64_4}"
+          if [ -z "$JOINED" ]; then JOINED="$KEYSTORE_BASE64"; fi
+          printf '%s' "$JOINED" | tr -d '[:space:]' | base64 --decode --ignore-garbage > "${{ runner.temp }}/mouthmidi-release.jks"
           ls -la "${{ runner.temp }}/mouthmidi-release.jks"
-          test $(stat -c%s "${{ runner.temp }}/mouthmidi-release.jks") -gt 2000
+          test $(stat -c%s "${{ runner.temp }}/mouthmidi-release.jks") -eq 2798
           keytool -list -keystore "${{ runner.temp }}/mouthmidi-release.jks" -storepass "$KEYSTORE_PASSWORD" | grep -i mouthmidi
-
       - name: Build Free + Pro release APKs (signed)
         env:
           KEYSTORE_FILE: ${{ runner.temp }}/mouthmidi-release.jks
