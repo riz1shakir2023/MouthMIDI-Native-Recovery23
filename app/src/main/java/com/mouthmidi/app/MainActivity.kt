@@ -73,7 +73,11 @@ class MainActivity : AppCompatActivity() {
     // Live store link for the Pro listing. Empty until the Gumroad/Ko-fi
     // listings exist — paste the Pro product URL here before release and the
     // "Get Pro" buttons start working. Never a placeholder link.
-    private val PRO_STORE_URL: String = ""
+    private val PRO_STORE_LINKS = listOf(
+        "Gumroad" to "https://rizwanster2811.gumroad.com/l/mouthmidi-pro",
+        "Ko-fi" to "https://ko-fi.com/s/4b1fb08410",
+        "Payhip" to "https://payhip.com/b/skLm1"
+    )
     private lateinit var calibrationStatusText: TextView
     private lateinit var settingsScrollView: ScrollView
     private lateinit var settingsRootLayout: LinearLayout
@@ -1421,25 +1425,26 @@ class MainActivity : AppCompatActivity() {
 
     private fun showProUpsell() {
 
-        val builder = AlertDialog.Builder(this)
-            .setTitle("MouthMIDI Pro")
+        val items = PRO_STORE_LINKS.map { (name, _) ->
+            "Buy Pro on $name — \$19.99"
+        }.toTypedArray()
+
+        AlertDialog.Builder(this)
+            .setTitle("MouthMIDI Pro — \$19.99")
             .setMessage(
                 "Settings are locked in the Free version.\n\n" +
                 "Pro unlocks presets, mouth calibration, every tracking " +
                 "slider, MIDI channel & CC number, themes, device options " +
-                "and Wi-Fi MIDI."
+                "and Wi-Fi MIDI.\n\n" +
+                "Choose a store to buy Pro:"
             )
-            .setNegativeButton("Not now", null)
-
-        if (PRO_STORE_URL.isNotBlank()) {
-            builder.setPositiveButton("Get Pro") { _, _ ->
+            .setItems(items) { _, which ->
                 startActivity(
-                    Intent(Intent.ACTION_VIEW, Uri.parse(PRO_STORE_URL))
+                    Intent(Intent.ACTION_VIEW, Uri.parse(PRO_STORE_LINKS[which].second))
                 )
             }
-        }
-
-        builder.show()
+            .setNegativeButton("Not now", null)
+            .show()
     }
 
 
