@@ -1425,24 +1425,48 @@ class MainActivity : AppCompatActivity() {
 
     private fun showProUpsell() {
 
-        val items = PRO_STORE_LINKS.map { (name, _) ->
-            "Buy Pro on $name — \$19.99"
-        }.toTypedArray()
+        // NOTE: the earlier setItems() list rendered with zero height in
+        // this dialog (title + message showed, store rows did not), so the
+        // stores are real Buttons in a custom view instead — Buttons
+        // render visibly in this theme, as the banner above proves.
+        val density = resources.displayMetrics.density
+        val pad = (16 * density).toInt()
 
-        AlertDialog.Builder(this)
-            .setTitle("MouthMIDI Pro — \$19.99")
-            .setMessage(
-                "Settings are locked in the Free version.\n\n" +
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(pad, pad, pad, 0)
+        }
+
+        val messageView = TextView(this).apply {
+            text = "Settings are locked in the Free version.\n\n" +
                 "Pro unlocks presets, mouth calibration, every tracking " +
                 "slider, MIDI channel & CC number, themes, device options " +
                 "and Wi-Fi MIDI.\n\n" +
                 "Choose a store to buy Pro:"
-            )
-            .setItems(items) { _, which ->
-                startActivity(
-                    Intent(Intent.ACTION_VIEW, Uri.parse(PRO_STORE_LINKS[which].second))
-                )
+            textSize = 16f
+            setPadding(0, 0, 0, pad)
+        }
+        layout.addView(messageView)
+
+        var dialog: AlertDialog? = null
+        for ((name, url) in PRO_STORE_LINKS) {
+            val button = Button(this).apply {
+                text = "Buy Pro on $name — \$19.99"
+                setOnClickListener {
+                    dialog?.dismiss()
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                }
             }
+            val params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = (8 * density).toInt() }
+            layout.addView(button, params)
+        }
+
+        dialog = AlertDialog.Builder(this)
+            .setTitle("MouthMIDI Pro — \$19.99")
+            .setView(layout)
             .setNegativeButton("Not now", null)
             .show()
     }
