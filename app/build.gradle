@@ -16,7 +16,7 @@ android {
         // versionCode, bumped together. That is what lets Pro install over
         // Free as an in-place update, keeping the user's settings/presets.
         versionCode 2
-        versionName "1.0.1"
+        versionName "1.0.0"
     }
 
     flavorDimensions "tier"
